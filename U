@@ -189,15 +189,15 @@ function Library:CreateUI(title, description, allowedUserIds)
 
 
 DestroyGUIButton.MouseButton1Click:Connect(function()
-    ConfirmationOverlay.Visible = true
+    self.ConfirmationOverlay.Visible = true
 end)
 
 ConfirmDestroyButton.MouseButton1Click:Connect(function()
-    MainFrame:Destroy()
+    self.MainFrame:Destroy()
 end)
 
 CancelDestroyButton.MouseButton1Click:Connect(function()
-    ConfirmationOverlay.Visible = false
+    self.ConfirmationOverlay.Visible = false
 end)
 
 confi.MouseButton1Click:Connect(function()
@@ -207,7 +207,7 @@ confi.MouseButton1Click:Connect(function()
     sonido.PlayOnRemove = true
     sonido.Parent = confi
     sonido:Destroy()
-    backgroundOverlay.Visible = not backgroundOverlay.Visible
+    self.backgroundOverlay.Visible = not self.backgroundOverlay.Visible
 end)
 
 self.border = Instance.new("UIStroke")
@@ -265,7 +265,7 @@ function self:toggleButton()
     task.wait(0.2)
     self.button:TweenSize(UDim2.new(0, 40, 0, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
     self.button.BackgroundTransparency = 0.3
-    task.wait(2)
+    task.wait(1.5)
     self.button.BackgroundTransparency = 0.8
 end
 self.button.MouseButton1Click:Connect(function()
