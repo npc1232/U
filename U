@@ -8,7 +8,7 @@ end
 
 local mainGui = Instance.new("ScreenGui")
 mainGui.Parent = coreGui
-print("h")
+print("+")
 
 local function addCorner(instance, radius)
     local corner = Instance.new("UICorner")
@@ -187,26 +187,32 @@ function Library:CreateUI(title, description, allowedUserIds)
     self.CancelDestroyButton.Parent = self.ConfirmationWindow
     addCorner(self.CancelDestroyButton, 4)
 
-
-DestroyGUIButton.MouseButton1Click:Connect(function()
-    self.ConfirmationOverlay.Visible = true
-end)
-
-ConfirmDestroyButton.MouseButton1Click:Connect(function()
-    self.MainFrame:Destroy()
-end)
-
-CancelDestroyButton.MouseButton1Click:Connect(function()
-    self.ConfirmationOverlay.Visible = false
-end)
-
-confi.MouseButton1Click:Connect(function()
+local function playClickSound(parent)
     local sonido = Instance.new("Sound")
     sonido.SoundId = "rbxassetid://17208399163"
     sonido.Volume = 0.5
     sonido.PlayOnRemove = true
-    sonido.Parent = confi
+    sonido.Parent = parent
     sonido:Destroy()
+end
+
+DestroyGUIButton.MouseButton1Click:Connect(function()
+    playClickSound(DestroyGUIButton)
+    self.ConfirmationOverlay.Visible = true
+end)
+
+ConfirmDestroyButton.MouseButton1Click:Connect(function()
+    playClickSound(ConfirmDestroyButton)
+    self.MainFrame:Destroy()
+end)
+
+CancelDestroyButton.MouseButton1Click:Connect(function()
+    playClickSound(CancelDestroyButton)
+    self.ConfirmationOverlay.Visible = false
+end)
+
+confi.MouseButton1Click:Connect(function()
+    playClickSound(confi)
     self.backgroundOverlay.Visible = not self.backgroundOverlay.Visible
 end)
 
