@@ -8,7 +8,7 @@ end
 
 local mainGui = Instance.new("ScreenGui")
 mainGui.Parent = coreGui
-print("+")
+print("hh")
 
 local function addCorner(instance, radius)
     local corner = Instance.new("UICorner")
@@ -17,6 +17,12 @@ local function addCorner(instance, radius)
 end
 
 local TweenService = game:GetService("TweenService")
+-- Primero CREAMOS los botones
+local DestroyGUIButton = Instance.new("TextButton")
+local ConfirmDestroyButton = Instance.new("TextButton")
+local CancelDestroyButton = Instance.new("TextButton")
+local confi = Instance.new("TextButton")
+
 
 -- esta es la tabla de colores 
 local redondoContenedor = 6
@@ -196,6 +202,7 @@ local function playClickSound(parent)
     sonido:Destroy()
 end
 
+-- Después conectamos sus eventos
 DestroyGUIButton.MouseButton1Click:Connect(function()
     playClickSound(DestroyGUIButton)
     self.ConfirmationOverlay.Visible = true
