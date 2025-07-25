@@ -1,7 +1,12 @@
+
+
+
+
+
 local GUIModule = {}
 GUIModule.__index = GUIModule
 
-function GUIModule:CreateMenu(title)
+function GUIModule:CreateMenu(title, description)
     local menu = {}
     menu.Tabs = {}
     menu.Visible = false
@@ -17,31 +22,98 @@ function GUIModule:CreateMenu(title)
     screenGui.Parent = playerGui
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 400, 0, 300)
-    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    mainFrame.Size = UDim2.new(0, 450, 0, 350)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -175)
     mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
 
+    local topBar = Instance.new("Frame")
+    topBar.Size = UDim2.new(1, 0, 0, 30)
+    topBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    topBar.BorderSizePixel = 0
+    topBar.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(0.5, 0, 1, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Text = title or "Menu"
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.Parent = topBar
+
+    local descriptionLabel = Instance.new("TextLabel")
+    descriptionLabel.Size = UDim2.new(0.5, 0, 1, 0)
+    descriptionLabel.BackgroundTransparency = 1
+    descriptionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    descriptionLabel.Text = description or ""
+    descriptionLabel.Font = Enum.Font.SourceSans
+    descriptionLabel.TextSize = 14
+    descriptionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descriptionLabel.Position = UDim2.new(0.5, 10, 0, 0)
+    descriptionLabel.Parent = topBar
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 1, 0)
+    closeButton.Position = UDim2.new(1, -60, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Text = "X"
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 20
+    closeButton.Parent = topBar
+
+    local configButton = Instance.new("TextButton")
+    configButton.Size = UDim2.new(0, 30, 1, 0)
+    configButton.Position = UDim2.new(1, -30, 0, 0)
+    configButton.BackgroundColor3 = Color3.fromRGB(50, 150, 180)
+    configButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    configButton.Text = "⚙"
+    configButton.Font = Enum.Font.SourceSansBold
+    configButton.TextSize = 20
+    configButton.Parent = topBar
+
     local tabButtonsFrame = Instance.new("Frame")
-    tabButtonsFrame.Size = UDim2.new(1, 0, 0, 30)
+    tabButtonsFrame.Size = UDim2.new(1, 0, 0, 35)
+    tabButtonsFrame.Position = UDim2.new(0, 0, 0, 30)
     tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     tabButtonsFrame.BorderSizePixel = 0
     tabButtonsFrame.Parent = mainFrame
 
     local contentFrame = Instance.new("Frame")
-    contentFrame.Size = UDim2.new(1, 0, 1, -30)
-    contentFrame.Position = UDim2.new(0, 0, 0, 30)
+    contentFrame.Size = UDim2.new(1, 0, 1, -65)
+    contentFrame.Position = UDim2.new(0, 0, 0, 65)
     contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     contentFrame.BorderSizePixel = 0
     contentFrame.Parent = mainFrame
 
     menu.ScreenGui = screenGui
     menu.MainFrame = mainFrame
+    menu.TopBar = topBar
+    menu.TitleLabel = titleLabel
+    menu.DescriptionLabel = descriptionLabel
+    menu.CloseButton = closeButton
+    menu.ConfigButton = configButton
     menu.TabButtonsFrame = tabButtonsFrame
     menu.ContentFrame = contentFrame
     menu.TabFrames = {}
     menu.CurrentTab = nil
+
+    closeButton.MouseButton1Click:Connect(function()
+        menu:Hide()
+    end)
+
+    local defaultColor = mainFrame.BackgroundColor3
+
+    configButton.MouseButton1Click:Connect(function()
+        local newColor = Color3.fromHSV(math.random(), 0.5, 0.9)
+        mainFrame.BackgroundColor3 = newColor
+        tabButtonsFrame.BackgroundColor3 = newColor:lerp(Color3.new(0,0,0),0.5)
+        topBar.BackgroundColor3 = newColor:lerp(Color3.new(0,0,0),0.7)
+    end)
 
     function menu:AddTab(name)
         local tab = {}
@@ -152,7 +224,6 @@ function GUIModule:CreateMenu(title)
             sliderHandle.Parent = sliderBar
 
             local dragging = false
-            local UserInputService = game:GetService("UserInputService")
 
             sliderHandle.MouseButton1Down:Connect(function()
                 dragging = true
