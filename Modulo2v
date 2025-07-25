@@ -1,7 +1,7 @@
 local GUIModule = {}
 GUIModule.__index = GUIModule
 
-local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 
 function GUIModule:CreateMenu(title, description)
@@ -9,19 +9,17 @@ function GUIModule:CreateMenu(title, description)
     menu.Tabs = {}
     menu.Visible = false
 
-    local player = Players.LocalPlayer
-    local playerGui = player:WaitForChild("PlayerGui")
-
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = title:gsub("%s+", "") .. "Menu"
     screenGui.ResetOnSpawn = false
-    screenGui.Parent = playerGui
+    screenGui.Parent = CoreGui
 
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 460, 0, 380)
     mainFrame.Position = UDim2.new(0.5, -230, 0.5, -190)
     mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     mainFrame.BorderSizePixel = 0
+    mainFrame.Visible = false
     mainFrame.Parent = screenGui
 
     local topBar = Instance.new("Frame")
@@ -72,20 +70,15 @@ function GUIModule:CreateMenu(title, description)
     configButton.TextSize = 20
     configButton.Parent = topBar
 
-    local tabButtonsFrame = Instance.new("Frame")
+    local tabButtonsFrame = Instance.new("ScrollingFrame")
     tabButtonsFrame.Size = UDim2.new(1, 0, 0, 40)
     tabButtonsFrame.Position = UDim2.new(0, 0, 0, 30)
     tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     tabButtonsFrame.BorderSizePixel = 0
-    tabButtonsFrame.ClipsDescendants = true
+    tabButtonsFrame.ScrollBarThickness = 6
+    tabButtonsFrame.HorizontalScrollBarInset = Enum.ScrollBarInset.Always
+    tabButtonsFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     tabButtonsFrame.Parent = mainFrame
-
-    local tabButtonsUIPadding = Instance.new("UIPadding")
-    tabButtonsUIPadding.PaddingLeft = UDim.new(0, 10)
-    tabButtonsUIPadding.PaddingRight = UDim.new(0, 10)
-    tabButtonsUIPadding.PaddingTop = UDim.new(0, 5)
-    tabButtonsUIPadding.PaddingBottom = UDim.new(0, 5)
-    tabButtonsUIPadding.Parent = tabButtonsFrame
 
     local contentFrame = Instance.new("ScrollingFrame")
     contentFrame.Size = UDim2.new(1, 0, 1, -70)
@@ -114,26 +107,121 @@ function GUIModule:CreateMenu(title, description)
         menu:Hide()
     end)
 
-    local defaultColor = mainFrame.BackgroundColor3
+    local currentColor = mainFrame.BackgroundColor3
 
-    local function applyColorToControls(color)
+    local function applyColorToAll(color)
+        currentColor = color
         mainFrame.BackgroundColor3 = color
         topBar.BackgroundColor3 = color:lerp(Color3.new(0,0,0),0.7)
         tabButtonsFrame.BackgroundColor3 = color:lerp(Color3.new(0,0,0),0.5)
+        for _, btn in pairs(menu.TabButtons) do
+            btn.BackgroundColor3 = color:lerp(Color3.new(0.15,0.15,0.15), 0.7)
+        end
         for _, tab in pairs(menu.Tabs) do
             for _, ctrl in pairs(tab.Controls) do
-                if ctrl.SetBackgroundColor3 then
-                    ctrl:SetBackgroundColor3(color:lerp(Color3.new(0.2,0.2,0.2), 0.5))
-                elseif ctrl.BackgroundColor3 then
+                if ctrl:IsA("TextButton") or ctrl:IsA("Frame") then
                     ctrl.BackgroundColor3 = color:lerp(Color3.new(0.2,0.2,0.2), 0.5)
                 end
             end
         end
     end
 
+    local colorPickerFrame
+    local function createColorPicker()
+        if colorPickerFrame then
+            colorPickerFrame:Destroy()
+        end
+        colorPickerFrame = Instance.new("Frame")
+        colorPickerFrame.Size = UDim2.new(0, 200, 0, 220)
+        colorPickerFrame.Position = UDim2.new(1, 10, 0, 30)
+        colorPickerFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        colorPickerFrame.BorderSizePixel = 0
+        colorPickerFrame.Parent = mainFrame
+
+        local huePicker = Instance.new("ImageLabel")
+        huePicker.Size = UDim2.new(0, 180, 0, 20)
+        huePicker.Position = UDim2.new(0, 10, 0, 10)
+        huePicker.BackgroundTransparency = 1
+        huePicker.Image = "rbxassetid://3926305904"
+        huePicker.Parent = colorPickerFrame
+
+        local saturationValuePicker = Instance.new("ImageLabel")
+        saturationValuePicker.Size = UDim2.new(0, 180, 0, 180)
+        saturationValuePicker.Position = UDim2.new(0, 10, 0, 40)
+        saturationValuePicker.BackgroundTransparency = 1
+        saturationValuePicker.Image = "rbxassetid://3926307971"
+        saturationValuePicker.Parent = colorPickerFrame
+
+        local selectedColorPreview = Instance.new("Frame")
+        selectedColorPreview.Size = UDim2.new(0, 180, 0, 20)
+        selectedColorPreview.Position = UDim2.new(0, 10, 1, -30)
+        selectedColorPreview.BackgroundColor3 = currentColor
+        selectedColorPreview.BorderSizePixel = 0
+        selectedColorPreview.Parent = colorPickerFrame
+
+        local hue = 0
+        local saturation = 1
+        local value = 1
+
+        local function updateColor()
+            local c = Color3.fromHSV(hue, saturation, value)
+            selectedColorPreview.BackgroundColor3 = c
+            applyColorToAll(c)
+        end
+
+        local draggingHue = false
+        local draggingSatVal = false
+
+        local function inputEnded(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingHue = false
+                draggingSatVal = false
+            end
+        end
+
+        local function inputChanged(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                if draggingHue then
+                    local pos = math.clamp(input.Position.X - huePicker.AbsolutePosition.X, 0, huePicker.AbsoluteSize.X)
+                    hue = pos / huePicker.AbsoluteSize.X
+                    updateColor()
+                elseif draggingSatVal then
+                    local x = math.clamp(input.Position.X - saturationValuePicker.AbsolutePosition.X, 0, saturationValuePicker.AbsoluteSize.X)
+                    local y = math.clamp(input.Position.Y - saturationValuePicker.AbsolutePosition.Y, 0, saturationValuePicker.AbsoluteSize.Y)
+                    saturation = x / saturationValuePicker.AbsoluteSize.X
+                    value = 1 - y / saturationValuePicker.AbsoluteSize.Y
+                    updateColor()
+                end
+            end
+        end
+
+        huePicker.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingHue = true
+                inputChanged(input)
+            end
+        end)
+
+        saturationValuePicker.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSatVal = true
+                inputChanged(input)
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(inputChanged)
+        UserInputService.InputEnded:Connect(inputEnded)
+
+        return colorPickerFrame
+    end
+
     configButton.MouseButton1Click:Connect(function()
-        local newColor = Color3.fromHSV(math.random(), 0.5, 0.9)
-        applyColorToControls(newColor)
+        if colorPickerFrame and colorPickerFrame.Parent then
+            colorPickerFrame:Destroy()
+            colorPickerFrame = nil
+        else
+            colorPickerFrame = createColorPicker()
+        end
     end)
 
     function menu:AddTab(name, imageId)
@@ -145,10 +233,10 @@ function GUIModule:CreateMenu(title, description)
         tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabButton.Text = name
-        tabButton.Size = UDim2.new(0, 100, 1, 0)
+        tabButton.Size = UDim2.new(0, 120, 1, 0)
         tabButton.Parent = tabButtonsFrame
+        tabButton.AutoButtonColor = false
 
-        -- Image label (icon) right side of the tab text
         if imageId then
             local icon = Instance.new("ImageLabel")
             icon.Size = UDim2.new(0, 20, 0, 20)
@@ -167,19 +255,18 @@ function GUIModule:CreateMenu(title, description)
         menu.TabFrames[name] = tabContent
         menu.TabButtons[#menu.TabButtons+1] = tabButton
 
-        local function updateTabsLayout()
-            local padding = 10
-            local totalWidth = tabButtonsFrame.AbsoluteSize.X
-            local buttonCount = #menu.TabButtons
-            local buttonWidth = math.floor((totalWidth - padding*(buttonCount+1)) / buttonCount)
-            for i, btn in ipairs(menu.TabButtons) do
-                btn.Size = UDim2.new(0, buttonWidth, 1, 0)
-                btn.Position = UDim2.new(0, padding + (i-1)*(buttonWidth + padding), 0, 0)
+        -- Ajuste canvas para scroll horizontal pestañas
+        local function updateCanvas()
+            local totalWidth = 0
+            for _, btn in ipairs(menu.TabButtons) do
+                totalWidth = totalWidth + btn.AbsoluteSize.X + 5
             end
+            tabButtonsFrame.CanvasSize = UDim2.new(0, totalWidth, 0, 40)
         end
 
-        tabButtonsFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTabsLayout)
-        updateTabsLayout()
+        tabButtonsFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateCanvas)
+        tabButton:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateCanvas)
+        updateCanvas()
 
         tabButton.MouseButton1Click:Connect(function()
             for _, frame in pairs(menu.TabFrames) do
@@ -197,7 +284,7 @@ function GUIModule:CreateMenu(title, description)
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(0, 150, 0, 30)
             btn.Position = UDim2.new(0, 10, 0, #tab.Controls * 35 + 10)
-            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            btn.BackgroundColor3 = currentColor:lerp(Color3.new(0.15,0.15,0.15), 0.7)
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             btn.Text = text
             btn.Parent = tabContent
@@ -210,7 +297,7 @@ function GUIModule:CreateMenu(title, description)
             local toggleFrame = Instance.new("Frame")
             toggleFrame.Size = UDim2.new(0, 150, 0, 30)
             toggleFrame.Position = UDim2.new(0, 10, 0, #tab.Controls * 35 + 10)
-            toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            toggleFrame.BackgroundColor3 = currentColor:lerp(Color3.new(0.15,0.15,0.15), 0.7)
             toggleFrame.Parent = tabContent
 
             local label = Instance.new("TextLabel")
@@ -244,7 +331,7 @@ function GUIModule:CreateMenu(title, description)
             local sliderFrame = Instance.new("Frame")
             sliderFrame.Size = UDim2.new(0, 150, 0, 40)
             sliderFrame.Position = UDim2.new(0, 10, 0, #tab.Controls * 45 + 10)
-            sliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            sliderFrame.BackgroundColor3 = currentColor:lerp(Color3.new(0.15,0.15,0.15), 0.7)
             sliderFrame.Parent = tabContent
 
             local label = Instance.new("TextLabel")
@@ -299,7 +386,7 @@ function GUIModule:CreateMenu(title, description)
 
     function menu:Show()
         self.Visible = true
-        self.ScreenGui.Enabled = true
+        self.MainFrame.Visible = true
         if #self.Tabs > 0 then
             local firstTab = self.Tabs[1]
             for _, frame in pairs(self.TabFrames) do
@@ -320,18 +407,21 @@ function GUIModule:CreateMenu(title, description)
 
     function menu:Hide()
         self.Visible = false
-        self.ScreenGui.Enabled = false
+        self.MainFrame.Visible = false
+        if colorPickerFrame then
+            colorPickerFrame:Destroy()
+            colorPickerFrame = nil
+        end
     end
 
-    -- Floating toggle button on left middle screen to show/hide menu
     local toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(0, 30, 0, 80)
-    toggleButton.Position = UDim2.new(0, 0, 0.5, -40)
+    toggleButton.Size = UDim2.new(0, 40, 0, 100)
+    toggleButton.Position = UDim2.new(0, 0, 0.5, -50)
     toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggleButton.Text = "Menu"
     toggleButton.Font = Enum.Font.SourceSansBold
-    toggleButton.TextSize = 14
+    toggleButton.TextSize = 16
     toggleButton.Parent = screenGui
     toggleButton.ZIndex = 10
 
