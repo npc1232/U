@@ -1,3 +1,6 @@
+
+
+
 local GUIModule = {}
 GUIModule.__index = GUIModule
 
@@ -72,12 +75,19 @@ function GUIModule:CreateMenu(title, description)
     configButton.TextSize = 20
     configButton.Parent = topBar
 
-    local tabButtonsFrame = Instance.new("Frame")
-    tabButtonsFrame.Size = UDim2.new(1, 0, 0, 35)
-    tabButtonsFrame.Position = UDim2.new(0, 0, 0, 30)
-    tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    tabButtonsFrame.BorderSizePixel = 0
-    tabButtonsFrame.Parent = mainFrame
+    local tabScrollingFrame = Instance.new("ScrollingFrame")
+    tabScrollingFrame.Size = UDim2.new(1, 0, 0, 35)
+    tabScrollingFrame.Position = UDim2.new(0, 0, 0, 30)
+    tabScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    tabScrollingFrame.BorderSizePixel = 0
+    tabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    tabScrollingFrame.ScrollBarThickness = 5
+    tabScrollingFrame.Parent = mainFrame
+
+    local tabButtonsUIListLayout = Instance.new("UIListLayout")
+    tabButtonsUIListLayout.FillDirection = Enum.FillDirection.Horizontal
+    tabButtonsUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabButtonsUIListLayout.Parent = tabScrollingFrame
 
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, 0, 1, -65)
@@ -86,7 +96,6 @@ function GUIModule:CreateMenu(title, description)
     contentFrame.BorderSizePixel = 0
     contentFrame.Parent = mainFrame
 
-    -- Botón flotante para mostrar/ocultar menú
     local toggleButton = Instance.new("TextButton")
     toggleButton.Size = UDim2.new(0, 40, 0, 100)
     toggleButton.Position = UDim2.new(0, 5, 0.5, -50)
@@ -98,6 +107,52 @@ function GUIModule:CreateMenu(title, description)
     toggleButton.Parent = screenGui
     toggleButton.ZIndex = 10
 
+    -- Frame configuración de colores
+    local configFrame = Instance.new("Frame")
+    configFrame.Size = UDim2.new(0, 200, 0, 150)
+    configFrame.Position = UDim2.new(1, -210, 0, 40)
+    configFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    configFrame.BorderSizePixel = 0
+    configFrame.Visible = false
+    configFrame.Parent = mainFrame
+
+    local colorTitle = Instance.new("TextLabel")
+    colorTitle.Size = UDim2.new(1, 0, 0, 25)
+    colorTitle.BackgroundTransparency = 1
+    colorTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    colorTitle.Text = "Cambiar color menú"
+    colorTitle.Font = Enum.Font.SourceSansBold
+    colorTitle.TextSize = 18
+    colorTitle.Parent = configFrame
+
+    local function createColorButton(color, posX)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 30, 0, 30)
+        btn.Position = UDim2.new(0, posX, 0, 40)
+        btn.BackgroundColor3 = color
+        btn.BorderSizePixel = 0
+        btn.Parent = configFrame
+        btn.MouseButton1Click:Connect(function()
+            mainFrame.BackgroundColor3 = color
+            tabScrollingFrame.BackgroundColor3 = color:lerp(Color3.new(0,0,0),0.5)
+            topBar.BackgroundColor3 = color:lerp(Color3.new(0,0,0),0.7)
+        end)
+    end
+
+    -- Algunos colores básicos
+    local colors = {
+        Color3.fromRGB(20, 20, 20),
+        Color3.fromRGB(180, 50, 50),
+        Color3.fromRGB(50, 150, 180),
+        Color3.fromRGB(50, 180, 100),
+        Color3.fromRGB(180, 180, 50),
+        Color3.fromRGB(180, 50, 180),
+    }
+
+    for i, color in ipairs(colors) do
+        createColorButton(color, (i-1)*35 + 10)
+    end
+
     toggleButton.MouseButton1Click:Connect(function()
         mainFrame.Visible = not mainFrame.Visible
         menu.Visible = mainFrame.Visible
@@ -108,12 +163,8 @@ function GUIModule:CreateMenu(title, description)
         menu.Visible = false
     end)
 
-    local defaultColor = mainFrame.BackgroundColor3
     configButton.MouseButton1Click:Connect(function()
-        local newColor = Color3.fromHSV(math.random(), 0.5, 0.9)
-        mainFrame.BackgroundColor3 = newColor
-        tabButtonsFrame.BackgroundColor3 = newColor:lerp(Color3.new(0,0,0),0.5)
-        topBar.BackgroundColor3 = newColor:lerp(Color3.new(0,0,0),0.7)
+        configFrame.Visible = not configFrame.Visible
     end)
 
     menu.ScreenGui = screenGui
@@ -123,9 +174,11 @@ function GUIModule:CreateMenu(title, description)
     menu.DescriptionLabel = descriptionLabel
     menu.CloseButton = closeButton
     menu.ConfigButton = configButton
-    menu.TabButtonsFrame = tabButtonsFrame
+    menu.TabScrollingFrame = tabScrollingFrame
+    menu.TabButtonsUIListLayout = tabButtonsUIListLayout
     menu.ContentFrame = contentFrame
     menu.ToggleButton = toggleButton
+    menu.ConfigFrame = configFrame
     menu.TabFrames = {}
     menu.CurrentTab = nil
 
@@ -138,7 +191,8 @@ function GUIModule:CreateMenu(title, description)
         tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabButton.Text = name
-        tabButton.Parent = tabButtonsFrame
+        tabButton.Size = UDim2.new(0, 100, 1, 0)
+        tabButton.Parent = tabScrollingFrame
 
         local tabContent = Instance.new("Frame")
         tabContent.Size = UDim2.new(1, 0, 1, 0)
@@ -148,34 +202,13 @@ function GUIModule:CreateMenu(title, description)
 
         menu.TabFrames[name] = tabContent
 
-        local function updateTabsLayout()
-            local buttons = tabButtonsFrame:GetChildren()
-            local tabButtons = {}
-            for _, v in pairs(buttons) do
-                if v:IsA("TextButton") then
-                    table.insert(tabButtons, v)
-                end
-            end
-            local count = #tabButtons
-            if count == 0 then return end
-            local buttonWidth = tabButtonsFrame.AbsoluteSize.X / count
-            for i, btn in ipairs(tabButtons) do
-                btn.Size = UDim2.new(0, buttonWidth, 1, 0)
-                btn.Position = UDim2.new(0, buttonWidth * (i-1), 0, 0)
-            end
-        end
-
-        -- Actualizar layout al cambiar tamaño
-        tabButtonsFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTabsLayout)
-        updateTabsLayout()
-
         tabButton.MouseButton1Click:Connect(function()
             for _, frame in pairs(menu.TabFrames) do
                 frame.Visible = false
             end
             tabContent.Visible = true
             menu.CurrentTab = name
-            for _, btn in pairs(tabButtonsFrame:GetChildren()) do
+            for _, btn in pairs(tabScrollingFrame:GetChildren()) do
                 if btn:IsA("TextButton") then
                     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                 end
@@ -250,17 +283,17 @@ function GUIModule:CreateMenu(title, description)
             sliderBar.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
             sliderBar.Parent = sliderFrame
 
-            local sliderHandle = Instance.new("TextButton")
+            local sliderHandle = Instance.new("Frame")
             sliderHandle.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-            sliderHandle.Position = UDim2.new(0, 0, 0, 0)
             sliderHandle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-            sliderHandle.Text = ""
             sliderHandle.Parent = sliderBar
 
             local dragging = false
 
-            sliderHandle.MouseButton1Down:Connect(function()
-                dragging = true
+            sliderBar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = true
+                end
             end)
 
             UserInputService.InputEnded:Connect(function(input)
@@ -297,12 +330,12 @@ function GUIModule:CreateMenu(title, description)
                 frame.Visible = false
             end
             self.TabFrames[firstTab.Name].Visible = true
-            for _, btn in pairs(self.TabButtonsFrame:GetChildren()) do
+            for _, btn in pairs(tabScrollingFrame:GetChildren()) do
                 if btn:IsA("TextButton") then
                     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                 end
             end
-            for _, btn in pairs(self.TabButtonsFrame:GetChildren()) do
+            for _, btn in pairs(tabScrollingFrame:GetChildren()) do
                 if btn:IsA("TextButton") and btn.Text == firstTab.Name then
                     btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
                 end
@@ -315,6 +348,7 @@ function GUIModule:CreateMenu(title, description)
         self.Visible = false
         self.ScreenGui.Enabled = false
         mainFrame.Visible = false
+        configFrame.Visible = false
     end
 
     return menu
