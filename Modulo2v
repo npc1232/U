@@ -1,16 +1,14 @@
 local GUIModule = {}
 GUIModule.__index = GUIModule
 
-function GUIModule:Init(parent)
-    self.Parent = parent
-end
-
 function GUIModule:CreateMenu(title)
     local menu = {}
     menu.Tabs = {}
     menu.Visible = false
 
-    local player = game:GetService("Players").LocalPlayer
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local player = Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
 
     local screenGui = Instance.new("ScreenGui")
@@ -18,28 +16,31 @@ function GUIModule:CreateMenu(title)
     screenGui.ResetOnSpawn = false
     screenGui.Parent = playerGui
 
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 400, 0, 300)
-    frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.Parent = screenGui
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 400, 0, 300)
+    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
 
     local tabButtonsFrame = Instance.new("Frame")
     tabButtonsFrame.Size = UDim2.new(1, 0, 0, 30)
-    tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    tabButtonsFrame.Parent = frame
+    tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    tabButtonsFrame.BorderSizePixel = 0
+    tabButtonsFrame.Parent = mainFrame
 
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, 0, 1, -30)
     contentFrame.Position = UDim2.new(0, 0, 0, 30)
-    contentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    contentFrame.Parent = frame
+    contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    contentFrame.BorderSizePixel = 0
+    contentFrame.Parent = mainFrame
 
     menu.ScreenGui = screenGui
-    menu.Frame = frame
+    menu.MainFrame = mainFrame
     menu.TabButtonsFrame = tabButtonsFrame
     menu.ContentFrame = contentFrame
-    menu.TabGuiObjects = {}
+    menu.TabFrames = {}
     menu.CurrentTab = nil
 
     function menu:AddTab(name)
@@ -49,32 +50,41 @@ function GUIModule:CreateMenu(title)
 
         local tabButton = Instance.new("TextButton")
         tabButton.Size = UDim2.new(0, 100, 1, 0)
-        tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabButton.Text = name
-        tabButton.Parent = menu.TabButtonsFrame
+        tabButton.Parent = tabButtonsFrame
+
+        local tabContent = Instance.new("Frame")
+        tabContent.Size = UDim2.new(1, 0, 1, 0)
+        tabContent.BackgroundTransparency = 1
+        tabContent.Visible = false
+        tabContent.Parent = contentFrame
+
+        menu.TabFrames[name] = tabContent
 
         tabButton.MouseButton1Click:Connect(function()
-            menu:SelectTab(name)
+            for _, frame in pairs(menu.TabFrames) do
+                frame.Visible = false
+            end
+            tabContent.Visible = true
+            menu.CurrentTab = name
+            for _, btn in pairs(tabButtonsFrame:GetChildren()) do
+                if btn:IsA("TextButton") then
+                    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                end
+            end
+            tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         end)
-
-        menu.TabGuiObjects[name] = {
-            Button = tabButton,
-            Container = Instance.new("Frame", menu.ContentFrame)
-        }
-        local container = menu.TabGuiObjects[name].Container
-        container.Size = UDim2.new(1, 0, 1, 0)
-        container.BackgroundTransparency = 1
-        container.Visible = false
 
         function tab:AddButton(text, callback)
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(0, 150, 0, 30)
             btn.Position = UDim2.new(0, 10, 0, #tab.Controls * 35 + 10)
-            btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             btn.Text = text
-            btn.Parent = container
+            btn.Parent = tabContent
             btn.MouseButton1Click:Connect(callback)
             table.insert(tab.Controls, btn)
             return btn
@@ -84,8 +94,8 @@ function GUIModule:CreateMenu(title)
             local toggleFrame = Instance.new("Frame")
             toggleFrame.Size = UDim2.new(0, 150, 0, 30)
             toggleFrame.Position = UDim2.new(0, 10, 0, #tab.Controls * 35 + 10)
-            toggleFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            toggleFrame.Parent = container
+            toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            toggleFrame.Parent = tabContent
 
             local label = Instance.new("TextLabel")
             label.Size = UDim2.new(0.7, 0, 1, 0)
@@ -118,14 +128,14 @@ function GUIModule:CreateMenu(title)
             local sliderFrame = Instance.new("Frame")
             sliderFrame.Size = UDim2.new(0, 150, 0, 40)
             sliderFrame.Position = UDim2.new(0, 10, 0, #tab.Controls * 45 + 10)
-            sliderFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            sliderFrame.Parent = container
+            sliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            sliderFrame.Parent = tabContent
 
             local label = Instance.new("TextLabel")
             label.Size = UDim2.new(1, 0, 0, 20)
             label.BackgroundTransparency = 1
             label.TextColor3 = Color3.fromRGB(255, 255, 255)
-            label.Text = text .. ": " .. tostring(default)
+            label.Text = text .. ": " .. tostring(math.floor(default))
             label.Parent = sliderFrame
 
             local sliderBar = Instance.new("Frame")
@@ -142,17 +152,19 @@ function GUIModule:CreateMenu(title)
             sliderHandle.Parent = sliderBar
 
             local dragging = false
+            local UserInputService = game:GetService("UserInputService")
+
             sliderHandle.MouseButton1Down:Connect(function()
                 dragging = true
             end)
 
-            game:GetService("UserInputService").InputEnded:Connect(function(input)
+            UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = false
                 end
             end)
 
-            game:GetService("UserInputService").InputChanged:Connect(function(input)
+            UserInputService.InputChanged:Connect(function(input)
                 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                     local relativeX = math.clamp(input.Position.X - sliderBar.AbsolutePosition.X, 0, sliderBar.AbsoluteSize.X)
                     local value = min + (relativeX / sliderBar.AbsoluteSize.X) * (max - min)
@@ -170,19 +182,26 @@ function GUIModule:CreateMenu(title)
         return tab
     end
 
-    function menu:SelectTab(name)
-        for tabName, guiObjects in pairs(self.TabGuiObjects) do
-            guiObjects.Container.Visible = (tabName == name)
-            guiObjects.Button.BackgroundColor3 = (tabName == name) and Color3.fromRGB(100,100,100) or Color3.fromRGB(50,50,50)
-        end
-        self.CurrentTab = name
-    end
-
     function menu:Show()
         self.Visible = true
         self.ScreenGui.Enabled = true
         if #self.Tabs > 0 then
-            self:SelectTab(self.Tabs[1].Name)
+            local firstTab = self.Tabs[1]
+            for _, frame in pairs(self.TabFrames) do
+                frame.Visible = false
+            end
+            self.TabFrames[firstTab.Name].Visible = true
+            for _, btn in pairs(self.TabButtonsFrame:GetChildren()) do
+                if btn:IsA("TextButton") then
+                    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                end
+            end
+            for _, btn in pairs(self.TabButtonsFrame:GetChildren()) do
+                if btn:IsA("TextButton") and btn.Text == firstTab.Name then
+                    btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                end
+            end
+            self.CurrentTab = firstTab.Name
         end
     end
 
