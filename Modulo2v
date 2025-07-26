@@ -1,4 +1,3 @@
-
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -6,7 +5,7 @@ local existingGui = coreGui:FindFirstChild("FoundationOverlay")
 if existingGui then
     existingGui:Destroy()
 end
-
+--fu
 local mainGui = Instance.new("ScreenGui")
 mainGui.Parent = coreGui
 print("how long did it take to load?")
@@ -878,11 +877,12 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
     local colorPickerPopup = Instance.new("Frame")
     colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
     colorPickerPopup.Position = UDim2.new(0.5, -180, 0.5, -85)
-    colorPickerPopup.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
-    colorPickerPopup.BackgroundTransparency = 0.6
+    colorPickerPopup.BackgroundColor3 = FrameContenedor
+    colorPickerPopup.BackgroundTransparency = 1
     colorPickerPopup.BorderSizePixel = 2
-    colorPickerPopup.BorderColor3 = Color3.fromRGB(100, 100, 100)
+    colorPickerPopup.BorderColor3 = bordecuadro
     colorPickerPopup.Visible = false
+    colorPickerPopup.ClipsDescendants = true
     colorPickerPopup.Parent = container
 
     addCorner(colorPickerPopup, 8)
@@ -974,10 +974,11 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
             BackgroundTransparency = 1
         })
         closeTween:Play()
-        closeTween.Completed:Wait()
-        colorPickerPopup.Visible = false
-        colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
-        colorPickerPopup.BackgroundTransparency = 0.6
+        closeTween.Completed:Connect(function()
+            colorPickerPopup.Visible = false
+            colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
+            colorPickerPopup.BackgroundTransparency = 0.6
+        end)
         if callback then
             callback(pickerFrame.BackgroundColor3)
         end
@@ -1006,18 +1007,20 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
 
     local function togglePopup()
         if colorPickerPopup.Visible then
-            local closeTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.2), {
+            local closeTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.25), {
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundTransparency = 1
             })
             closeTween:Play()
-            closeTween.Completed:Wait()
-            colorPickerPopup.Visible = false
-            colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
-            colorPickerPopup.BackgroundTransparency = 0.6
+            closeTween.Completed:Connect(function()
+                colorPickerPopup.Visible = false
+                colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
+                colorPickerPopup.BackgroundTransparency = 0.6
+            end)
         else
             colorPickerPopup.Visible = true
             colorPickerPopup.Size = UDim2.new(0, 0, 0, 0)
+            colorPickerPopup.BackgroundTransparency = 1
             local openTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.25), {
                 Size = UDim2.new(0, 360, 0, 170),
                 BackgroundTransparency = 0.6
