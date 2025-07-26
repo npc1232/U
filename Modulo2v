@@ -1,8 +1,4 @@
 
-
-
-
-
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -28,12 +24,12 @@ local TransparenciaContenedordelElementos = 0.3
 local TamanoContenedor = UDim2.new(1, 0, 0, 45)
 local TransparenciaContenedor = 0.4
 
-local FrameContenedor = Color3.fromRGB(255, 180, 70) -- amarillo tostado
-local bordes = Color3.fromRGB(255, 130, 40) -- naranja quemado
-local bordecuadro = Color3.fromRGB(220, 60, 30) -- rojo fuerte
-local main = Color3.fromRGB(255, 100, 50) -- rojo-naranja principal
-local ColorContenedordelElementos = Color3.fromRGB(255, 170, 80) -- naranja claro
-local textcolor = Color3.fromRGB(80, 20, 0) -- marrón oscuro para contraste y calor visual
+local FrameContenedor = Color3.fromRGB(255, 180, 70)
+local bordes = Color3.fromRGB(255, 130, 40) 
+local bordecuadro = Color3.fromRGB(220, 60, 30)
+local main = Color3.fromRGB(255, 100, 50) 
+local ColorContenedordelElementos = Color3.fromRGB(255, 170, 80) 
+local textcolor = Color3.fromRGB(80, 20, 0)
 
 local sizeW, sizeH = 590, 300
 
@@ -828,6 +824,8 @@ function module.addToggle(container, labelText, descriptionText, defaultState, c
 end
 
 function module.addColorPicker(container, labelText, defaultColor, callback)
+    local TweenService = game:GetService("TweenService")
+
     local ColorPicker = Instance.new("Frame")
     ColorPicker.Size = TamanoContenedor
     ColorPicker.BackgroundColor3 = FrameContenedor
@@ -878,8 +876,8 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
     openButton.Parent = pickerFrame
 
     local colorPickerPopup = Instance.new("Frame")
-    colorPickerPopup.Size = UDim2.new(0, 300, 0, 150)
-    colorPickerPopup.Position = UDim2.new(0.5, -150, 0.5, -75)
+    colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
+    colorPickerPopup.Position = UDim2.new(0.5, -180, 0.5, -85)
     colorPickerPopup.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
     colorPickerPopup.BackgroundTransparency = 0.6
     colorPickerPopup.BorderSizePixel = 2
@@ -891,11 +889,17 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
 
     local colorWheel = Instance.new("ImageLabel")
     colorWheel.Size = UDim2.new(0, 150, 0, 150)
-    colorWheel.Position = UDim2.new(0.5, -75, 0, 10)
-    colorWheel.Image = "rbxassetid://142488478"
+    colorWheel.Position = UDim2.new(0, 10, 0, 10)
+    colorWheel.Image = "rbxassetid://6020299385"
     colorWheel.BackgroundTransparency = 1
     colorWheel.Active = true
     colorWheel.Parent = colorPickerPopup
+
+    local controlColumn = Instance.new("Frame")
+    controlColumn.Size = UDim2.new(0, 180, 0, 150)
+    controlColumn.Position = UDim2.new(0, 170, 0, 10)
+    controlColumn.BackgroundTransparency = 1
+    controlColumn.Parent = colorPickerPopup
 
     local colorSelector = Instance.new("Frame")
     colorSelector.Size = UDim2.new(0, 10, 0, 10)
@@ -906,28 +910,28 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
     addCorner(colorSelector, 5)
 
     local confirmButton = Instance.new("TextButton")
-    confirmButton.Size = UDim2.new(0.5, -5, 0, 30)
-    confirmButton.Position = UDim2.new(0, 5, 1, -40)
+    confirmButton.Size = UDim2.new(1, -10, 0, 30)
+    confirmButton.Position = UDim2.new(0, 5, 0, 0)
     confirmButton.Text = "Confirm"
     confirmButton.Font = Enum.Font.Gotham
     confirmButton.TextSize = 14
     confirmButton.TextColor3 = textcolor
     confirmButton.BackgroundColor3 = ColorContenedordelElementos
     confirmButton.BorderSizePixel = 0
-    confirmButton.Parent = colorPickerPopup
+    confirmButton.Parent = controlColumn
 
     addCorner(confirmButton, 5)
 
     local rainbowButton = Instance.new("TextButton")
-    rainbowButton.Size = UDim2.new(0.5, -5, 0, 30)
-    rainbowButton.Position = UDim2.new(0.5, 0, 1, -40)
+    rainbowButton.Size = UDim2.new(1, -10, 0, 30)
+    rainbowButton.Position = UDim2.new(0, 5, 0, 40)
     rainbowButton.Text = "Rainbow"
     rainbowButton.Font = Enum.Font.Gotham
     rainbowButton.TextSize = 14
     rainbowButton.TextColor3 = textcolor
     rainbowButton.BackgroundColor3 = ColorContenedordelElementos
     rainbowButton.BorderSizePixel = 0
-    rainbowButton.Parent = colorPickerPopup
+    rainbowButton.Parent = controlColumn
 
     addCorner(rainbowButton, 5)
 
@@ -939,11 +943,9 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
         local rel = colorWheel.AbsolutePosition
         local x = math.clamp((pos.X - rel.X) / colorWheel.AbsoluteSize.X, 0, 1)
         local y = math.clamp((pos.Y - rel.Y) / colorWheel.AbsoluteSize.Y, 0, 1)
-
         colorSelector.Position = UDim2.new(x, -5, y, -5)
         local selected = Color3.fromHSV(x, 1 - y, 1)
         pickerFrame.BackgroundColor3 = selected
-
         if callback then
             callback(selected)
         end
@@ -967,7 +969,15 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
     end)
 
     confirmButton.MouseButton1Click:Connect(function()
+        local closeTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 0, 0, 0),
+            BackgroundTransparency = 1
+        })
+        closeTween:Play()
+        closeTween.Completed:Wait()
         colorPickerPopup.Visible = false
+        colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
+        colorPickerPopup.BackgroundTransparency = 0.6
         if callback then
             callback(pickerFrame.BackgroundColor3)
         end
@@ -976,14 +986,15 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
     rainbowButton.MouseButton1Click:Connect(function()
         rainbowActive = not rainbowActive
         rainbowButton.BackgroundColor3 = rainbowActive and Color3.fromRGB(60, 0, 120) or ColorContenedordelElementos
-
         if rainbowActive then
             local step = 0
             rainbowConnection = game:GetService("RunService").RenderStepped:Connect(function(dt)
                 step = (step + dt * 0.1) % 1
                 local color = Color3.fromHSV(step, 1, 1)
                 pickerFrame.BackgroundColor3 = color
-                if callback then callback(color) end
+                if callback then
+                    callback(color)
+                end
             end)
         else
             if rainbowConnection then
@@ -993,9 +1004,29 @@ function module.addColorPicker(container, labelText, defaultColor, callback)
         end
     end)
 
-    openButton.MouseButton1Click:Connect(function()
-        colorPickerPopup.Visible = not colorPickerPopup.Visible
-    end)
+    local function togglePopup()
+        if colorPickerPopup.Visible then
+            local closeTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.2), {
+                Size = UDim2.new(0, 0, 0, 0),
+                BackgroundTransparency = 1
+            })
+            closeTween:Play()
+            closeTween.Completed:Wait()
+            colorPickerPopup.Visible = false
+            colorPickerPopup.Size = UDim2.new(0, 360, 0, 170)
+            colorPickerPopup.BackgroundTransparency = 0.6
+        else
+            colorPickerPopup.Visible = true
+            colorPickerPopup.Size = UDim2.new(0, 0, 0, 0)
+            local openTween = TweenService:Create(colorPickerPopup, TweenInfo.new(0.25), {
+                Size = UDim2.new(0, 360, 0, 170),
+                BackgroundTransparency = 0.6
+            })
+            openTween:Play()
+        end
+    end
+
+    openButton.MouseButton1Click:Connect(togglePopup)
 
     return ColorPicker
 end
