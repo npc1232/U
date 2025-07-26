@@ -181,7 +181,6 @@ separator.BorderSizePixel = 0
 separator.ZIndex = 20
 separator.Parent = confirmationFrame
 
-
 local DestroyGUIButton = Instance.new("TextButton")
 DestroyGUIButton.Size = UDim2.new(0, 26, 0, 27)
 DestroyGUIButton.Position = UDim2.new(1, -70, 0, 0)
@@ -367,7 +366,7 @@ end)
 
     local DescriptionLabel = Instance.new("TextLabel")
     DescriptionLabel.Size = UDim2.new(0, 100, 1, 0)
-    DescriptionLabel.Position = UDim2.new(1, -320, 0, 0)
+    DescriptionLabel.Position = UDim2.new(1, -310, 0, 0)
     DescriptionLabel.BackgroundTransparency = 1
     DescriptionLabel.Text = description
     DescriptionLabel.TextSize = 14
@@ -825,136 +824,139 @@ function module.addToggle(container, labelText, descriptionText, defaultState, c
 end
 
 function module.addColorPicker(container, labelText, defaultColor, callback)
-local ColorPicker = Instance.new("Frame")
-ColorPicker.Size = TamanoContenedor
-ColorPicker.BackgroundColor3 = FrameContenedor
-ColorPicker.Parent = container
-ColorPicker.BackgroundTransparency = TransparenciaContenedor
+    local ColorPicker = Instance.new("Frame")
+    ColorPicker.Size = TamanoContenedor
+    ColorPicker.BackgroundColor3 = FrameContenedor
+    ColorPicker.BackgroundTransparency = TransparenciaContenedor
+    ColorPicker.Parent = container
 
     local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = ColorPicker.ZIndex + 1
-borderFrame.Parent = ColorPicker
+    borderFrame.Size = UDim2.new(1, 0, 1, 0)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.ZIndex = ColorPicker.ZIndex + 1
+    borderFrame.Parent = ColorPicker
 
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Thickness = 2
-borderStroke.Color = bordecuadro
-borderStroke.Parent = borderFrame
-addCorner(borderFrame, redondoContenedor)
-addCorner(ColorPicker, redondoContenedor)
+    local borderStroke = Instance.new("UIStroke")
+    borderStroke.Thickness = 2
+    borderStroke.Color = bordecuadro
+    borderStroke.Parent = borderFrame
 
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(0.3, 0, 1, 0)
-label.Text = labelText
-label.Position = UDim2.new(0, 10, 0, 0)
-label.TextColor3 = textcolor
-label.BackgroundTransparency = 1
-label.TextXAlignment = Enum.TextXAlignment.Left
-label.Font = Enum.Font.Gotham
-label.TextSize = 15
-label.Parent = ColorPicker
+    addCorner(ColorPicker, redondoContenedor)
+    addCorner(borderFrame, redondoContenedor)
 
-local pickerFrame = Instance.new("Frame")
-pickerFrame.Size = UDim2.new(0, 120, 0, 30)
-pickerFrame.AnchorPoint = Vector2.new(1, 0)
-pickerFrame.Position = UDim2.new(1, -10, 0, 5)
-pickerFrame.BackgroundColor3 = defaultColor or Color3.fromRGB(0, 140, 0) -- Verde como color predeterminado
-pickerFrame.BackgroundTransparency = 0.1
-pickerFrame.BorderSizePixel = 2
-pickerFrame.BorderColor3 = Color3.fromRGB(80, 80, 80)
-pickerFrame.Parent = ColorPicker
-addCorner(pickerFrame, 6)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.3, 0, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.Text = labelText
+    label.TextColor3 = textcolor
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 15
+    label.Parent = ColorPicker
 
-local openButton = Instance.new("TextButton")
-openButton.Size = UDim2.new(1, 0, 1, 0)
-openButton.Text = ""
-openButton.BackgroundTransparency = 1
-openButton.Parent = pickerFrame
+    local pickerFrame = Instance.new("Frame")
+    pickerFrame.Size = UDim2.new(0, 120, 0, 30)
+    pickerFrame.AnchorPoint = Vector2.new(1, 0)
+    pickerFrame.Position = UDim2.new(1, -10, 0, 5)
+    pickerFrame.BackgroundColor3 = defaultColor or Color3.fromRGB(0, 140, 0)
+    pickerFrame.BackgroundTransparency = 0.1
+    pickerFrame.BorderSizePixel = 2
+    pickerFrame.BorderColor3 = Color3.fromRGB(80, 80, 80)
+    pickerFrame.Parent = ColorPicker
 
-local colorPickerPopup = Instance.new("Frame")
-colorPickerPopup.Size = UDim2.new(0, 300, 0, 150)
-colorPickerPopup.Position = UDim2.new(0.5, -150, 0.5, -75)
-colorPickerPopup.BackgroundColor3 = Color3.fromRGB(128, 0, 128) 
-colorPickerPopup.BackgroundTransparency = 0.6 
-colorPickerPopup.Visible = false
-colorPickerPopup.BorderSizePixel = 2
-colorPickerPopup.BorderColor3 = Color3.fromRGB(100, 100, 100)
-colorPickerPopup.Parent = container
-addCorner(colorPickerPopup, 8)
+    addCorner(pickerFrame, 6)
 
-local colorWheel = Instance.new("ImageLabel")
-colorWheel.Size = UDim2.new(0, 150, 0, 150)
-colorWheel.Position = UDim2.new(0.5, -75, 0, 10)
-colorWheel.Image = "rbxassetid://142488478"
-colorWheel.BackgroundTransparency = 1
-colorWheel.Active = true
-colorWheel.Parent = colorPickerPopup
+    local openButton = Instance.new("TextButton")
+    openButton.Size = UDim2.new(1, 0, 1, 0)
+    openButton.Text = ""
+    openButton.BackgroundTransparency = 1
+    openButton.Parent = pickerFrame
 
-local colorSelector = Instance.new("Frame")
-colorSelector.Size = UDim2.new(0, 10, 0, 10)
-colorSelector.BackgroundColor3 = textcolor
-colorSelector.BorderSizePixel = 2
-colorSelector.Parent = colorWheel
-addCorner(colorSelector, 5)
+    local colorPickerPopup = Instance.new("Frame")
+    colorPickerPopup.Size = UDim2.new(0, 300, 0, 150)
+    colorPickerPopup.Position = UDim2.new(0.5, -150, 0.5, -75)
+    colorPickerPopup.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+    colorPickerPopup.BackgroundTransparency = 0.6
+    colorPickerPopup.BorderSizePixel = 2
+    colorPickerPopup.BorderColor3 = Color3.fromRGB(100, 100, 100)
+    colorPickerPopup.Visible = false
+    colorPickerPopup.Parent = container
 
-local confirmButton = Instance.new("TextButton")
-confirmButton.Size = UDim2.new(0.5, -5, 0, 30)
-confirmButton.Position = UDim2.new(0, 5, 1, -40)
-confirmButton.Text = "Confirm"
-confirmButton.Font = Enum.Font.Gotham
-confirmButton.TextSize = 14
-confirmButton.TextColor3 = textcolor
-confirmButton.BackgroundColor3 = ColorContenedordelElementos
-confirmButton.BorderSizePixel = 0
-confirmButton.Parent = colorPickerPopup
-addCorner(confirmButton, 5)
+    addCorner(colorPickerPopup, 8)
 
-local rainbowButton = Instance.new("TextButton")
-rainbowButton.Size = UDim2.new(0.5, -5, 0, 30)
-rainbowButton.Position = UDim2.new(0.5, 0, 1, -40)
-rainbowButton.Text = "Rainbow"
-rainbowButton.Font = Enum.Font.Gotham
-rainbowButton.TextSize = 14
-rainbowButton.TextColor3 = textcolor
-rainbowButton.BackgroundColor3 = ColorContenedordelElementos
-rainbowButton.BorderSizePixel = 0
-rainbowButton.Parent = colorPickerPopup
-addCorner(rainbowButton, 5)
+    local colorWheel = Instance.new("ImageLabel")
+    colorWheel.Size = UDim2.new(0, 150, 0, 150)
+    colorWheel.Position = UDim2.new(0.5, -75, 0, 10)
+    colorWheel.Image = "rbxassetid://142488478"
+    colorWheel.BackgroundTransparency = 1
+    colorWheel.Active = true
+    colorWheel.Parent = colorPickerPopup
+
+    local colorSelector = Instance.new("Frame")
+    colorSelector.Size = UDim2.new(0, 10, 0, 10)
+    colorSelector.BackgroundColor3 = textcolor
+    colorSelector.BorderSizePixel = 2
+    colorSelector.Parent = colorWheel
+
+    addCorner(colorSelector, 5)
+
+    local confirmButton = Instance.new("TextButton")
+    confirmButton.Size = UDim2.new(0.5, -5, 0, 30)
+    confirmButton.Position = UDim2.new(0, 5, 1, -40)
+    confirmButton.Text = "Confirm"
+    confirmButton.Font = Enum.Font.Gotham
+    confirmButton.TextSize = 14
+    confirmButton.TextColor3 = textcolor
+    confirmButton.BackgroundColor3 = ColorContenedordelElementos
+    confirmButton.BorderSizePixel = 0
+    confirmButton.Parent = colorPickerPopup
+
+    addCorner(confirmButton, 5)
+
+    local rainbowButton = Instance.new("TextButton")
+    rainbowButton.Size = UDim2.new(0.5, -5, 0, 30)
+    rainbowButton.Position = UDim2.new(0.5, 0, 1, -40)
+    rainbowButton.Text = "Rainbow"
+    rainbowButton.Font = Enum.Font.Gotham
+    rainbowButton.TextSize = 14
+    rainbowButton.TextColor3 = textcolor
+    rainbowButton.BackgroundColor3 = ColorContenedordelElementos
+    rainbowButton.BorderSizePixel = 0
+    rainbowButton.Parent = colorPickerPopup
+
+    addCorner(rainbowButton, 5)
 
     local rainbowActive = false
     local rainbowConnection
 
     local function updateColor(input)
-        local mousePosition = input.Position
-        local relativePosition = colorWheel.AbsolutePosition
-        local x = (mousePosition.X - relativePosition.X) / colorWheel.AbsoluteSize.X
-        local y = (mousePosition.Y - relativePosition.Y) / colorWheel.AbsoluteSize.Y
-        x = math.clamp(x, 0, 1)
-        y = math.clamp(y, 0, 1)
+        local pos = input.Position
+        local rel = colorWheel.AbsolutePosition
+        local x = math.clamp((pos.X - rel.X) / colorWheel.AbsoluteSize.X, 0, 1)
+        local y = math.clamp((pos.Y - rel.Y) / colorWheel.AbsoluteSize.Y, 0, 1)
 
         colorSelector.Position = UDim2.new(x, -5, y, -5)
-        pickerFrame.BackgroundColor3 = Color3.fromHSV(x, 1 - y, 1)
+        local selected = Color3.fromHSV(x, 1 - y, 1)
+        pickerFrame.BackgroundColor3 = selected
 
         if callback then
-            callback(pickerFrame.BackgroundColor3)
+            callback(selected)
         end
     end
 
     colorWheel.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             updateColor(input)
-            local connection
-            connection = game:GetService("UserInputService").InputChanged:Connect(function(moveInput)
-                if moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch then
-                    updateColor(moveInput)
+            local moving
+            moving = game:GetService("UserInputService").InputChanged:Connect(function(m)
+                if m.UserInputType == Enum.UserInputType.MouseMovement or m.UserInputType == Enum.UserInputType.Touch then
+                    updateColor(m)
                 end
             end)
-
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    connection:Disconnect()
+                if input.UserInputState == Enum.UserInputState.End and moving then
+                    moving:Disconnect()
                 end
             end)
         end
@@ -969,18 +971,15 @@ addCorner(rainbowButton, 5)
 
     rainbowButton.MouseButton1Click:Connect(function()
         rainbowActive = not rainbowActive
-        rainbowButton.BackgroundColor3 = rainbowActive and Color3.fromRGB(60, 0, 120) or Color3.fromRGB(0, 140, 0)
+        rainbowButton.BackgroundColor3 = rainbowActive and Color3.fromRGB(60, 0, 120) or ColorContenedordelElementos
 
         if rainbowActive then
             local step = 0
-            rainbowConnection = game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
-                step = (step + deltaTime * 0.1) % 1
+            rainbowConnection = game:GetService("RunService").RenderStepped:Connect(function(dt)
+                step = (step + dt * 0.1) % 1
                 local color = Color3.fromHSV(step, 1, 1)
                 pickerFrame.BackgroundColor3 = color
-                
-                if callback then
-                    callback(color)
-                end
+                if callback then callback(color) end
             end)
         else
             if rainbowConnection then
@@ -1389,69 +1388,75 @@ function module.addLabel(container, text)
 end
 
 function module.addKeybind(container, text, defaultKey, callback)
-	local KeybindFrame = Instance.new("Frame")
-	KeybindFrame.Name = "KeybindFrame"
-	KeybindFrame.Parent = container
-	KeybindFrame.Position = UDim2.new(0, 10, 0, 0)
-	KeybindFrame.BackgroundColor3 = FrameContenedor
-	KeybindFrame.Size = TamanoContenedor
-	KeybindFrame.BackgroundTransparency = TransparenciaContenedor
-	addCorner(KeybindFrame, redondoContenedor)
+    local UIS = game:GetService("UserInputService")
+
+    local KeybindFrame = Instance.new("Frame")
+    KeybindFrame.Name = "KeybindFrame"
+    KeybindFrame.Parent = container
+    KeybindFrame.Position = UDim2.new(0, 10, 0, 0)
+    KeybindFrame.BackgroundColor3 = FrameContenedor
+    KeybindFrame.Size = TamanoContenedor
+    KeybindFrame.BackgroundTransparency = TransparenciaContenedor
+    addCorner(KeybindFrame, redondoContenedor)
 
     local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = KeybindFrame.ZIndex -1
-borderFrame.Parent = KeybindFrame
+    borderFrame.Size = UDim2.new(1, 0, 1, 0)
+    borderFrame.Position = UDim2.new(0, 0, 0, 0)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.ZIndex = KeybindFrame.ZIndex - 1
+    borderFrame.Parent = KeybindFrame
 
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Thickness = 2
-borderStroke.Color = bordecuadro
-borderStroke.Parent = borderFrame
-addCorner(borderFrame, redondoContenedor)
-	local KeybindTitle = Instance.new("TextLabel")
-	KeybindTitle.Name = "KeybindTitle"
-	KeybindTitle.Parent = KeybindFrame
-	KeybindTitle.BackgroundColor3 = textcolor
-	KeybindTitle.BackgroundTransparency = 1
-	KeybindTitle.Position = UDim2.new(0, 15, 0, 0)
-	KeybindTitle.Size = UDim2.new(0, 300, 0, 45)
-	KeybindTitle.Font = Enum.Font.Gotham
-	KeybindTitle.Text = text
-	KeybindTitle.TextColor3 = textcolor
-	KeybindTitle.TextSize = 13
-	KeybindTitle.TextXAlignment = Enum.TextXAlignment.Left
+    local borderStroke = Instance.new("UIStroke")
+    borderStroke.Thickness = 2
+    borderStroke.Color = bordecuadro
+    borderStroke.Parent = borderFrame
+    addCorner(borderFrame, redondoContenedor)
 
-	local KeybindButton = Instance.new("TextButton")
-	KeybindButton.Name = "KeybindButton"
-	KeybindButton.Parent = KeybindFrame
-	KeybindButton.BackgroundColor3 = ColorContenedordelElementos
-	KeybindButton.AnchorPoint = Vector2.new(1, 0)
-KeybindButton.Position = UDim2.new(1, -10, 0, 5)
-	KeybindButton.Size = UDim2.new(0, 120, 0, 30)
-	KeybindButton.Font = Enum.Font.Gotham
-	KeybindButton.Text = defaultKey.Name
-	KeybindButton.BackgroundTransparency = TransparenciaContenedordelElementos
-	KeybindButton.TextColor3 = textcolor
-	KeybindButton.TextSize = 13
-	addCorner(KeybindButton, 5)
+    local KeybindTitle = Instance.new("TextLabel")
+    KeybindTitle.Name = "KeybindTitle"
+    KeybindTitle.Parent = KeybindFrame
+    KeybindTitle.BackgroundColor3 = textcolor
+    KeybindTitle.BackgroundTransparency = 1
+    KeybindTitle.Position = UDim2.new(0, 15, 0, 0)
+    KeybindTitle.Size = UDim2.new(0, 300, 0, 45)
+    KeybindTitle.Font = Enum.Font.Gotham
+    KeybindTitle.Text = text
+    KeybindTitle.TextColor3 = textcolor
+    KeybindTitle.TextSize = 13
+    KeybindTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-	local listening = false
+    local KeybindButton = Instance.new("TextButton")
+    KeybindButton.Name = "KeybindButton"
+    KeybindButton.Parent = KeybindFrame
+    KeybindButton.BackgroundColor3 = ColorContenedordelElementos
+    KeybindButton.AnchorPoint = Vector2.new(1, 0)
+    KeybindButton.Position = UDim2.new(1, -10, 0, 5)
+    KeybindButton.Size = UDim2.new(0, 120, 0, 30)
+    KeybindButton.Font = Enum.Font.Gotham
+    KeybindButton.Text = defaultKey.Name
+    KeybindButton.BackgroundTransparency = TransparenciaContenedordelElementos
+    KeybindButton.TextColor3 = textcolor
+    KeybindButton.TextSize = 13
+    addCorner(KeybindButton, 5)
 
-	KeybindButton.MouseButton1Click:Connect(function()
-		listening = true
-		KeybindButton.Text = "Press a key..."
-	end)
+    local listening = false
+    local currentKey = defaultKey
 
-	game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-		if listening and not gameProcessed then
-			local key = input.KeyCode.Name
-			KeybindButton.Text = key
-			callback(key)
-			listening = false
-		end
-	end)
+    KeybindButton.MouseButton1Click:Connect(function()
+        listening = true
+        KeybindButton.Text = "Press a key..."
+    end)
+
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if listening and not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
+            currentKey = input.KeyCode
+            KeybindButton.Text = currentKey.Name
+            callback(currentKey)
+            listening = false
+        elseif not listening and input.KeyCode == currentKey then
+            callback(currentKey)
+        end
+    end)
 end
 
 return module
