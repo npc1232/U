@@ -1,4 +1,3 @@
-
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -1499,26 +1498,53 @@ function module.addKeybind(container, text, defaultKey, callback)
 end
 
 local TweenService = game:GetService("TweenService")
-local coreGui = game:GetService("CoreGui")
-local NotificationStack = {}
+local CoreGui = game:GetService("CoreGui")
+local notifications = {}
 
-local function enqueueNotification(title, message, btn1Text, btn2Text, duration)
+local function createButton(text, xPos, color, parent)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 90, 0, 22)
+    button.Position = UDim2.new(0, xPos, 1, -32)
+    button.Text = text
+    button.Font = Enum.Font.GothamSemibold
+    button.TextSize = 13
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BackgroundColor3 = color
+    addCorner(button, 6)
+    button.Parent = parent
+    return button
+end
+
+local function showNotification(title, message, btn1Text, btn2Text, duration)
     local gui = Instance.new("ScreenGui")
     gui.Name = "Notifier_" .. tostring(math.random(1000, 9999))
     gui.ResetOnSpawn = false
     gui.IgnoreGuiInset = true
-    gui.Parent = coreGui
+    gui.Parent = CoreGui
 
-    local frame = Instance.new("Frame", gui)
+    local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 220, 0, 90)
     frame.AnchorPoint = Vector2.new(1, 1)
     frame.Position = UDim2.new(1, -10, 1, -10)
-    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    frame.BackgroundColor3 = FrameContenedor
+    frame.BackgroundTransparency = TransparenciaContenedor
     frame.BorderSizePixel = 0
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", frame).Color = Color3.fromRGB(60, 60, 60)
+    frame.Parent = gui
+    addCorner(frame, 8)
 
-    local titleLabel = Instance.new("TextLabel", frame)
+    local border = Instance.new("Frame")
+    border.Size = UDim2.new(1, 0, 1, 0)
+    border.Position = UDim2.new(0, 0, 0, 0)
+    border.BackgroundTransparency = 1
+    border.ZIndex = frame.ZIndex - 1
+    border.Parent = frame
+
+    local borderStroke = Instance.new("UIStroke")
+    borderStroke.Thickness = 2
+    borderStroke.Color = Color3.fromRGB(80, 80, 80)
+    borderStroke.Parent = border
+
+    local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -20, 0, 18)
     titleLabel.Position = UDim2.new(0, 10, 0, 8)
     titleLabel.BackgroundTransparency = 1
@@ -1527,8 +1553,9 @@ local function enqueueNotification(title, message, btn1Text, btn2Text, duration)
     titleLabel.TextSize = 16
     titleLabel.TextColor3 = Color3.new(1, 1, 1)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
 
-    local messageLabel = Instance.new("TextLabel", frame)
+    local messageLabel = Instance.new("TextLabel")
     messageLabel.Size = UDim2.new(1, -20, 0, 32)
     messageLabel.Position = UDim2.new(0, 10, 0, 28)
     messageLabel.BackgroundTransparency = 1
@@ -1539,51 +1566,52 @@ local function enqueueNotification(title, message, btn1Text, btn2Text, duration)
     messageLabel.TextWrapped = true
     messageLabel.TextXAlignment = Enum.TextXAlignment.Left
     messageLabel.TextYAlignment = Enum.TextYAlignment.Top
+    messageLabel.Parent = frame
 
-    local function createButton(text, posX, color)
-        local btn = Instance.new("TextButton", frame)
-        btn.Size = UDim2.new(0, 90, 0, 22)
-        btn.Position = UDim2.new(0, posX, 1, -32)
-        btn.Text = text
-        btn.Font = Enum.Font.GothamSemibold
-        btn.TextSize = 13
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        btn.BackgroundColor3 = color
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-        return btn
-    end
-
-    local b1 = btn1Text and createButton(btn1Text, 10, Color3.fromRGB(40, 120, 220)) or nil
-    local b2 = btn2Text and createButton(btn2Text, 115, Color3.fromRGB(180, 60, 60)) or nil
+    local button1 = btn1Text and createButton(btn1Text, 10, Color3.fromRGB(40, 120, 220), frame) or nil
+    local button2 = btn2Text and createButton(btn2Text, 115, Color3.fromRGB(180, 60, 60), frame) or nil
 
     local spacing = 8
-    local height = 100
-    local idx = #NotificationStack
-    local targetY = -10 - ((height + spacing) * idx)
-    TweenService:Create(frame, TweenInfo.new(0.3), {Position = UDim2.new(1, -10, 1, targetY)}):Play()
-    table.insert(NotificationStack, frame)
+    local notifHeight = 100
+    local index = #notifications
+    local targetY = -10 - ((notifHeight + spacing) * index)
 
-    local function close(result)
-        for i, f in ipairs(NotificationStack) do
-            if f == frame then table.remove(NotificationStack, i); break end
+    TweenService:Create(frame, TweenInfo.new(0.3), {Position = UDim2.new(1, -10, 1, targetY)}):Play()
+    table.insert(notifications, frame)
+
+    local function closeNotification()
+        for i, notif in ipairs(notifications) do
+            if notif == frame then
+                table.remove(notifications, i)
+                break
+            end
         end
-        TweenService:Create(frame, TweenInfo.new(0.3), {Position = UDim2.new(1, 230, 1, -10 * idx)}):Play()
+        TweenService:Create(frame, TweenInfo.new(0.3), {Position = UDim2.new(1, 230, 1, -10)}):Play()
         task.delay(0.35, function()
             gui:Destroy()
-            for i, f in ipairs(NotificationStack) do
-                local newY = -10 - ((height + spacing) * (i - 1))
-                TweenService:Create(f, TweenInfo.new(0.3), {Position = UDim2.new(1, -10, 1, newY)}):Play()
+            for i, notif in ipairs(notifications) do
+                local newY = -10 - ((notifHeight + spacing) * (i - 1))
+                TweenService:Create(notif, TweenInfo.new(0.3), {Position = UDim2.new(1, -10, 1, newY)}):Play()
             end
         end)
     end
 
-    if b1 then b1.MouseButton1Click:Connect(function() close(b1.Text) end) end
-    if b2 then b2.MouseButton1Click:Connect(function() close(b2.Text) end) end
-    if duration and duration > 0 then task.delay(duration, function() if frame.Parent then close("Timeout") end end) end
+    if button1 then
+        button1.MouseButton1Click:Connect(closeNotification)
+    end
+    if button2 then
+        button2.MouseButton1Click:Connect(closeNotification)
+    end
+
+    if duration and duration > 0 then
+        task.delay(duration, function()
+            if frame.Parent then closeNotification() end
+        end)
+    end
 end
 
 function module.addNotification(title, message, btn1Text, btn2Text, duration)
-    enqueueNotification(title, message, btn1Text, btn2Text, duration)
+    showNotification(title, message, btn1Text, btn2Text, duration)
 end
 
 return module
