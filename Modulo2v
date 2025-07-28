@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -1508,10 +1516,22 @@ local function createButton(text, xPos, color, parent)
     button.Text = text
     button.Font = Enum.Font.GothamSemibold
     button.TextSize = 13
-    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BackgroundTransparency = 1
+    button.TextColor3 = textcolor
     button.BackgroundColor3 = color
     addCorner(button, 6)
     button.Parent = parent
+    local border = Instance.new("Frame")
+    border.Size = UDim2.new(1, 0, 1, 0)
+    border.Position = UDim2.new(0, 0, 0, 0)
+    border.BackgroundTransparency = 1
+    border.ZIndex = button.ZIndex - 1
+    border.Parent = button
+    local borderStroke = Instance.new("UIStroke")
+    borderStroke.Thickness = 2
+    borderStroke.Color = Color3.fromRGB(80, 80, 80)
+    borderStroke.Parent = border
+    addCorner(border, 8)
     return button
 end
 
@@ -1543,6 +1563,7 @@ local function showNotification(title, message, btn1Text, btn2Text, duration)
     borderStroke.Thickness = 2
     borderStroke.Color = Color3.fromRGB(80, 80, 80)
     borderStroke.Parent = border
+    addCorner(border, 8)
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -20, 0, 18)
@@ -1562,7 +1583,7 @@ local function showNotification(title, message, btn1Text, btn2Text, duration)
     messageLabel.Text = message
     messageLabel.Font = Enum.Font.Gotham
     messageLabel.TextSize = 13
-    messageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    messageLabel.TextColor3 = textcolor
     messageLabel.TextWrapped = true
     messageLabel.TextXAlignment = Enum.TextXAlignment.Left
     messageLabel.TextYAlignment = Enum.TextYAlignment.Top
