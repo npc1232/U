@@ -8,7 +8,7 @@ end
 
 local mainGui = Instance.new("ScreenGui")
 mainGui.Parent = coreGui
-print("how long did it take to load?")
+print("how long did it take to load? v2")
 
 local function addCorner(instance, radius)
     local corner = Instance.new("UICorner")
@@ -365,7 +365,7 @@ end)
 
     local DescriptionLabel = Instance.new("TextLabel")
     DescriptionLabel.Size = UDim2.new(0, 100, 1, 0)
-    DescriptionLabel.Position = UDim2.new(1, -310, 0, 0)
+    DescriptionLabel.Position = UDim2.new(1, -350, 0, 0)
     DescriptionLabel.BackgroundTransparency = 1
     DescriptionLabel.Text = description
     DescriptionLabel.TextSize = 14
@@ -1503,7 +1503,7 @@ local notifications = {}
 
 local function createButton(text, xPos, color, parent)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 90, 0, 22)
+    button.Size = UDim2.new(0, 84, 0, 22)
     button.Position = UDim2.new(0, xPos, 1, -32)
     button.Text = text
     button.Font = Enum.Font.GothamSemibold
