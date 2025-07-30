@@ -1,4 +1,3 @@
-
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -324,8 +323,30 @@ clickSound.Parent = button
 
 local isActive = true
 
-local function setTransparencyRecursive(object, transparency)
-	for _, child in pairs(object:GetDescendants()) do
+local transparencyCache = {}
+
+local function saveOriginalTransparency(obj)
+	for _, child in pairs(obj:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			transparencyCache[child] = {
+				TextTransparency = child.TextTransparency,
+				BackgroundTransparency = child.BackgroundTransparency
+			}
+		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
+			transparencyCache[child] = {
+				BackgroundTransparency = child.BackgroundTransparency
+			}
+		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
+			transparencyCache[child] = {
+				ImageTransparency = child.ImageTransparency,
+				BackgroundTransparency = child.BackgroundTransparency
+			}
+		end
+	end
+end
+
+local function applyTransparency(obj, transparency)
+	for _, child in pairs(obj:GetDescendants()) do
 		if child:IsA("TextLabel") or child:IsA("TextButton") then
 			child.TextTransparency = transparency
 			child.BackgroundTransparency = transparency
@@ -338,22 +359,24 @@ local function setTransparencyRecursive(object, transparency)
 	end
 end
 
-local function tweenTransparencyRecursive(object, targetTransparency, duration)
-	for _, child in pairs(object:GetDescendants()) do
-		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			TweenService:Create(child, TweenInfo.new(duration), {
-				TextTransparency = targetTransparency,
-				BackgroundTransparency = targetTransparency
-			}):Play()
-		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
-			TweenService:Create(child, TweenInfo.new(duration), {
-				BackgroundTransparency = targetTransparency
-			}):Play()
-		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
-			TweenService:Create(child, TweenInfo.new(duration), {
-				ImageTransparency = targetTransparency,
-				BackgroundTransparency = targetTransparency
-			}):Play()
+local function tweenToOriginalTransparency(obj, duration)
+	for child, values in pairs(transparencyCache) do
+		if child:IsDescendantOf(obj) then
+			if values.TextTransparency then
+				TweenService:Create(child, TweenInfo.new(duration), {
+					TextTransparency = values.TextTransparency,
+					BackgroundTransparency = values.BackgroundTransparency
+				}):Play()
+			elseif values.ImageTransparency then
+				TweenService:Create(child, TweenInfo.new(duration), {
+					ImageTransparency = values.ImageTransparency,
+					BackgroundTransparency = values.BackgroundTransparency
+				}):Play()
+			elseif values.BackgroundTransparency then
+				TweenService:Create(child, TweenInfo.new(duration), {
+					BackgroundTransparency = values.BackgroundTransparency
+				}):Play()
+			end
 		end
 	end
 end
@@ -372,16 +395,16 @@ local function toggleButton()
 
 	if isActive then
 		MainFrame.Visible = true
-		setTransparencyRecursive(MainFrame, 1)
-		tweenTransparencyRecursive(MainFrame, 0.4, 0.3) -- o 0.6 si quieres más opaco
+		applyTransparency(MainFrame, 1)
+		tweenToOriginalTransparency(MainFrame, 0.3)
 	else
-		tweenTransparencyRecursive(MainFrame, 1, 0.3)
+		saveOriginalTransparency(MainFrame)
+		applyTransparency(MainFrame, 1) -- hace fade al 1 (invisible)
 		task.delay(0.3, function()
 			MainFrame.Visible = false
 		end)
 	end
 end
-
 
 button.MouseButton1Click:Connect(toggleButton)
 
