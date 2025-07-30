@@ -1,3 +1,6 @@
+
+
+
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -321,8 +324,7 @@ UICorner.Parent = button
 clickSound.SoundId = "rbxassetid://10066968815"
 clickSound.Parent = button
 
-local isActive = true
-
+local TweenService = game:GetService("TweenService")
 local transparencyCache = {}
 
 local function saveOriginalTransparency(obj)
@@ -345,41 +347,63 @@ local function saveOriginalTransparency(obj)
 	end
 end
 
-local function applyTransparency(obj, transparency)
-	for _, child in pairs(obj:GetDescendants()) do
-		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			child.TextTransparency = transparency
-			child.BackgroundTransparency = transparency
-		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
-			child.BackgroundTransparency = transparency
-		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
-			child.ImageTransparency = transparency
-			child.BackgroundTransparency = transparency
-		end
-	end
-end
-
 local function tweenToOriginalTransparency(obj, duration)
+	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local tweens = {}
+
 	for child, values in pairs(transparencyCache) do
 		if child:IsDescendantOf(obj) then
 			if values.TextTransparency then
-				TweenService:Create(child, TweenInfo.new(duration), {
+				table.insert(tweens, TweenService:Create(child, tweenInfo, {
 					TextTransparency = values.TextTransparency,
 					BackgroundTransparency = values.BackgroundTransparency
-				}):Play()
+				}))
 			elseif values.ImageTransparency then
-				TweenService:Create(child, TweenInfo.new(duration), {
+				table.insert(tweens, TweenService:Create(child, tweenInfo, {
 					ImageTransparency = values.ImageTransparency,
 					BackgroundTransparency = values.BackgroundTransparency
-				}):Play()
+				}))
 			elseif values.BackgroundTransparency then
-				TweenService:Create(child, TweenInfo.new(duration), {
+				table.insert(tweens, TweenService:Create(child, tweenInfo, {
 					BackgroundTransparency = values.BackgroundTransparency
-				}):Play()
+				}))
 			end
 		end
 	end
+
+	for _, tween in ipairs(tweens) do
+		tween:Play()
+	end
 end
+
+local function tweenAllTo(obj, targetTransparency, duration)
+	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local tweens = {}
+
+	for _, child in pairs(obj:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			table.insert(tweens, TweenService:Create(child, tweenInfo, {
+				TextTransparency = targetTransparency,
+				BackgroundTransparency = targetTransparency
+			}))
+		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
+			table.insert(tweens, TweenService:Create(child, tweenInfo, {
+				BackgroundTransparency = targetTransparency
+			}))
+		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
+			table.insert(tweens, TweenService:Create(child, tweenInfo, {
+				ImageTransparency = targetTransparency,
+				BackgroundTransparency = targetTransparency
+			}))
+		end
+	end
+
+	for _, tween in ipairs(tweens) do
+		tween:Play()
+	end
+end
+
+local isActive = true
 
 local function toggleButton()
 	isActive = not isActive
@@ -395,11 +419,11 @@ local function toggleButton()
 
 	if isActive then
 		MainFrame.Visible = true
-		applyTransparency(MainFrame, 1)
+		tweenAllTo(MainFrame, 1, 0)
 		tweenToOriginalTransparency(MainFrame, 0.3)
 	else
 		saveOriginalTransparency(MainFrame)
-		applyTransparency(MainFrame, 1) -- hace fade al 1 (invisible)
+		tweenAllTo(MainFrame, 1, 0.3)
 		task.delay(0.3, function()
 			MainFrame.Visible = false
 		end)
