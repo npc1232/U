@@ -1,6 +1,4 @@
 
-
-
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -326,6 +324,40 @@ clickSound.Parent = button
 
 local isActive = true
 
+local function setTransparencyRecursive(object, transparency)
+	for _, child in pairs(object:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			child.TextTransparency = transparency
+			child.BackgroundTransparency = transparency
+		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
+			child.BackgroundTransparency = transparency
+		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
+			child.ImageTransparency = transparency
+			child.BackgroundTransparency = transparency
+		end
+	end
+end
+
+local function tweenTransparencyRecursive(object, targetTransparency, duration)
+	for _, child in pairs(object:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			TweenService:Create(child, TweenInfo.new(duration), {
+				TextTransparency = targetTransparency,
+				BackgroundTransparency = targetTransparency
+			}):Play()
+		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
+			TweenService:Create(child, TweenInfo.new(duration), {
+				BackgroundTransparency = targetTransparency
+			}):Play()
+		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
+			TweenService:Create(child, TweenInfo.new(duration), {
+				ImageTransparency = targetTransparency,
+				BackgroundTransparency = targetTransparency
+			}):Play()
+		end
+	end
+end
+
 local function toggleButton()
 	isActive = not isActive
 	clickSound:Play()
@@ -340,19 +372,16 @@ local function toggleButton()
 
 	if isActive then
 		MainFrame.Visible = true
-		MainFrame.BackgroundTransparency = 1
-		TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			BackgroundTransparency = 0.6
-		}):Play()
+		setTransparencyRecursive(MainFrame, 1)
+		tweenTransparencyRecursive(MainFrame, 0.4, 0.3) -- o 0.6 si quieres más opaco
 	else
-		local fadeOut = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			BackgroundTransparency = 1
-		})
-		fadeOut:Play()
-		fadeOut.Completed:Wait()
-		MainFrame.Visible = false
+		tweenTransparencyRecursive(MainFrame, 1, 0.3)
+		task.delay(0.3, function()
+			MainFrame.Visible = false
+		end)
 	end
 end
+
 
 button.MouseButton1Click:Connect(toggleButton)
 
