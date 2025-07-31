@@ -1,3 +1,5 @@
+
+
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -325,33 +327,35 @@ local TweenService = game:GetService("TweenService")
 local transparencyCache = {}
 
 local function saveOriginalTransparency(obj)
-	transparencyCache[obj] = {}
+	if transparencyCache[obj] then return end
+	local cache = {}
 	for _, child in pairs(obj:GetDescendants()) do
 		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			transparencyCache[obj][child] = {
+			cache[child] = {
 				TextTransparency = child.TextTransparency,
 				BackgroundTransparency = child.BackgroundTransparency
 			}
 		elseif child:IsA("Frame") or child:IsA("ScrollingFrame") then
-			transparencyCache[obj][child] = {
+			cache[child] = {
 				BackgroundTransparency = child.BackgroundTransparency
 			}
 		elseif child:IsA("ImageButton") or child:IsA("ImageLabel") then
-			transparencyCache[obj][child] = {
+			cache[child] = {
 				ImageTransparency = child.ImageTransparency,
 				BackgroundTransparency = child.BackgroundTransparency
 			}
 		elseif child:IsA("UIStroke") then
-			transparencyCache[obj][child] = {
+			cache[child] = {
 				Transparency = child.Transparency
 			}
 		end
 	end
 	if obj:IsA("Frame") then
-		transparencyCache[obj][obj] = {
+		cache[obj] = {
 			BackgroundTransparency = obj.BackgroundTransparency
 		}
 	end
+	transparencyCache[obj] = cache
 end
 
 local function tweenToTransparency(obj, value, duration)
@@ -411,8 +415,6 @@ local function tweenRestoreTransparency(obj, duration)
 	end
 end
 
--- ⬇️ Final toggle con efecto fade limpio y sin delay
-
 local isActive = true
 
 local function toggleButton()
@@ -439,6 +441,7 @@ local function toggleButton()
 		end)
 	end
 end
+
 
 button.MouseButton1Click:Connect(toggleButton)
 
