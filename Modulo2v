@@ -1,3 +1,5 @@
+
+
 local module = {}
 
 local coreGui = game:GetService("CoreGui")
@@ -323,6 +325,7 @@ clickSound.Parent = button
 
 local TweenService = game:GetService("TweenService")
 local isActive = true
+local originalPos = MainFrame.Position
 
 local function toggleButton()
 	isActive = not isActive
@@ -337,14 +340,14 @@ local function toggleButton()
 	end)
 
 	if isActive then
-		MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 1.2, 0)
+		MainFrame.Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.2, 0)
 		MainFrame.Visible = true
 		TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.5, -MainFrame.Size.Y.Offset/2)
+			Position = originalPos
 		}):Play()
 	else
 		TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 1.2, 0)
+			Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.2, 0)
 		}):Play()
 		task.delay(0.3, function()
 			MainFrame.Visible = false
