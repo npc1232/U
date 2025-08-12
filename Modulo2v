@@ -1,39 +1,3 @@
-local module = {}
-
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
-
-print("V12")
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
-
-local request = http_request or request or syn and syn.request or http and http.request
-if not request then warn("Request not available") end
-
-local cloneref = cloneref or function(obj) return obj end
-
-local coreGui = (gethui and gethui()) or game:GetService("CoreGui")
-
- function protectGui(gui)
-    if syn and syn.protect_gui then
-        syn.protect_gui(gui)
-    elseif protectgui then
-        protectgui(gui)
-    end
-end
- function addCorner(instance, radius)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius)
-    corner.Parent = instance
-end
-
- function protectAncestry(gui)
-    gui.AncestryChanged:Connect(function(_, parent)
-        if not parent then
             gui.Parent = coreGui
         end
     end)
